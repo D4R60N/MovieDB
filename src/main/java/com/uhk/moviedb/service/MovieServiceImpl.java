@@ -7,6 +7,7 @@ import com.uhk.moviedb.repository.RatingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MovieServiceImpl implements MovieService {
@@ -30,7 +31,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public double calculateAverageRating(Movie movie) {
+    public Double calculateAverageRating(Movie movie) {
         List<Rating> ratings = ratingRepository.findByMovie(movie);
         return ratings.stream().mapToInt(Rating::getRating).average().orElse(0.0);
     }
@@ -38,6 +39,11 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public List<Movie> findAll() {
         return movieRepository.findAll();
+    }
+
+    @Override
+    public Optional<Movie> findById(Long id) {
+        return movieRepository.findById(id);
     }
 }
 

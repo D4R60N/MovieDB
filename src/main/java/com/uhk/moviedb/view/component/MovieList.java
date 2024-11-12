@@ -21,5 +21,11 @@ public class MovieList<T extends Movie> extends Grid<T> {
         addColumn(Movie::getDirector).setHeader("Director");
         addColumn(Movie::getReleaseDate).setHeader("Release Date");
 
+        addSelectionListener(e -> {
+            if (e.getFirstSelectedItem().isPresent()) {
+                getUI().ifPresent(ui -> ui.navigate("movie/" + e.getFirstSelectedItem().get().getId()));
+            }
+        });
+
     }
 }

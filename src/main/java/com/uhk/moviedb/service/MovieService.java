@@ -4,6 +4,7 @@ import com.uhk.moviedb.model.Movie;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface MovieService {
@@ -11,7 +12,10 @@ public interface MovieService {
 
     void save(Movie movie);
 
-    double calculateAverageRating(Movie movie);
+    Double calculateAverageRating(Movie movie);
 
     List<Movie> findAll();
+
+    Optional<Movie> findById(Long id);
+
 }
