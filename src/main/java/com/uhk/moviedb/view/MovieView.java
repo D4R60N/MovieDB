@@ -1,108 +1,100 @@
 package com.uhk.moviedb.view;
 
-import com.uhk.moviedb.model.Genre;
-import com.uhk.moviedb.model.Movie;
-import com.uhk.moviedb.service.GenreService;
-import com.uhk.moviedb.service.MovieServiceImpl;
+import com.uhk.moviedb.model.Rating;
+import com.uhk.moviedb.model.User;
+import com.uhk.moviedb.service.*;
+import com.uhk.moviedb.view.component.RatingComponent;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.formlayout.FormLayout;
+
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.html.Section;
+
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
+
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 
-import java.time.ZoneId;
-import java.util.List;
+import java.time.Instant;
+import java.util.Optional;
 
-import static com.vaadin.flow.component.textfield.NumberField.NumberFieldI18n;
 
 @Route("movie")
 @PermitAll
 @AnonymousAllowed
 public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
-    MovieServiceImpl movieService;
+    MovieService movieService;
     GenreService genreService;
+    RatingService ratingService;
+    UserService userService;
 
     private Long movieId;
+    private String actors;
+    private User author;
 
 
-    public MovieView(MovieServiceImpl movieService, GenreService genreService) {
+    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, UserService userService) {
         this.movieService = movieService;
         this.genreService = genreService;
-
-
+        this.ratingService = ratingService;
+        this.userService = userService;
+        //ošetřit
+        author = userService.findUserById(1L).orElse(null);
     }
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, Long aLong) {
         movieId = aLong;
         movieService.findById(movieId).ifPresent(movie -> {
-            TextField title = new TextField("Title");
-            title.setValue(movie.getTitle());
-            TextArea description = new TextArea("Description");
-            description.setValue(movie.getDescription());
-            ComboBox<Genre> genre = new ComboBox<Genre>("Genre", genreService.findAll());
-            genre.setItemLabelGenerator(Genre::getName);
-            genre.setValue(movie.getGenre());
-            TextField director = new TextField("Director");
-            director.setValue(movie.getDirector());
-            TextArea actors = new TextArea("Actors");
-            actors.setValue(movie.getActors());
-            NumberField duration = new NumberField("Duration (minutes)");
-            duration.setValue(movie.getDuration().doubleValue());
-            DatePicker releaseDate = new DatePicker("Release Date");
-            releaseDate.setValue(movie.getReleaseDate().atZone(ZoneId.systemDefault()).toLocalDate());
-            NumberField rating = new NumberField("Rating");
-            rating.setValue(movieService.calculateAverageRating(movie));
-            rating.setReadOnly(true);
 
-            duration.setStep(1);
-            duration.setMin(1);
-            duration.setStepButtonsVisible(true);
-            duration.setI18n(new NumberFieldI18n()
-                    .setBadInputErrorMessage("Invalid number format")
-                    .setStepErrorMessage("Duration must be rounded to the nearest minute"));
+            Section description = new Section();
+            description.add(new Text("Description: " + movie.getDescription()));
+            Section genre = new Section();
+            genre.add(new Text("Genre: " + movie.getGenre().getName()));
+            Section director = new Section();
+            director.add(new Text("Director: " + movie.getDirector()));
+            Section actors = new Section();
+            actors.add(new Text("Actors: " + movie.getActors()));
+            Section duration = new Section();
+            duration.add(new Text("Duration: " + movie.getDuration() + " minutes"));
+            Section releaseDate = new Section();
+            releaseDate.add(new Text("Release Date: " + movie.getReleaseDate()));
+            Section rating = new Section();
+            Rating userRating = ratingService.findByMovieAndAuthor(movie, author).orElse(new Rating());
+            rating.add(new Text("Rating: " + movieService.calculateAverageRating(movie)));
+            RatingComponent ratingComponent = new RatingComponent();
+            if (userRating.getRating() != null)
+                ratingComponent.setRating(userRating.getRating());
+            rating.add(ratingComponent);
 
-            title.setRequired(true);
-            description.setRequired(true);
-            releaseDate.setRequired(true);
-            director.setRequired(true);
-            actors.setRequired(true);
-            duration.setRequired(true);
-            genre.setRequired(true);
+            rating.add(new Button("Rate", e -> {
+                if (author == null) {
+                    return;
+                }
+                userRating.setRating(ratingComponent.getRating());
+                userRating.setMovie(movie);
+                userRating.setAuthor(author);
+                userRating.setCreatedAt(Instant.now());
+                ratingService.createRating(userRating);
+                getUI().ifPresent(ui -> ui.refreshCurrentRoute(false));
+            }));
+
+
             add(
-                    new H1("Edit Movie"),
-                    new FormLayout(
-                            title,
-                            description,
-                            genre,
-                            director,
-                            actors,
-                            releaseDate,
-                            duration,
-                            rating
-                    ),
-                    new Button("Save", e -> {
-                        movie.setTitle(title.getValue());
-                        movie.setDescription(description.getValue());
-                        movie.setReleaseDate(releaseDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                        movie.setDirector(director.getValue());
-                        movie.setActors(actors.getValue());
-                        movie.setDuration(duration.getValue().intValue());
-                        movie.setGenre(genre.getValue());
-                        movieService.save(movie);
-                        Notification notification = Notification.show("Movie Saved!");
-                        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    new H1(movie.getTitle()),
+                    description,
+                    genre,
+                    director,
+                    actors,
+                    duration,
+                    releaseDate,
+                    rating,
+
+                    new Button("Edit", e -> {
+                        getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
                     })
             );
         });
