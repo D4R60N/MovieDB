@@ -10,6 +10,8 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -19,6 +21,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.vaadin.flow.component.textfield.NumberField.*;
@@ -73,6 +76,36 @@ public class AddMovieView extends VerticalLayout {
         form.addFormItem(duration, "duration");
         Button saveButton = new Button("Save");
         saveButton.addClickListener(e -> {
+            List<String> errorList = new ArrayList<>();
+            if(title.isEmpty())
+                errorList.add("Title");
+            if(description.isEmpty())
+                errorList.add("Description");
+            if(releaseDate.isEmpty())
+                errorList.add("Release Date");
+            if(director.isEmpty())
+                errorList.add("Director");
+            if(actors.isEmpty())
+                errorList.add("Actors");
+            if(duration.isEmpty())
+                errorList.add("Duration");
+            if(genreCB.isEmpty())
+                errorList.add("Genre");
+            if(!errorList.isEmpty()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Missing values: ");
+                int i = 0;
+                for(String error : errorList) {
+                    String end = ", ";
+                    if(i >= errorList.size() - 1)
+                        end = ".";
+                    stringBuilder.append(error + end);
+                    i++;
+                }
+                Notification notification = Notification.show(stringBuilder.toString());
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
             Movie movie = new Movie();
             movie.setTitle(title.getValue());
             movie.setDescription(description.getValue());
@@ -83,6 +116,8 @@ public class AddMovieView extends VerticalLayout {
             movie.setGenre(genreCB.getValue());
             movieService.save(movie);
             getUI().ifPresent(ui -> ui.navigate(""));
+            Notification notification = Notification.show("Movie Saved!");
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         });
 
 

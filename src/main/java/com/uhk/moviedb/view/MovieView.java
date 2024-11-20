@@ -32,7 +32,6 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
     UserService userService;
 
     private Long movieId;
-    private String actors;
     private User author;
 
 
