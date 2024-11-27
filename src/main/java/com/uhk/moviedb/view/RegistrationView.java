@@ -6,7 +6,6 @@ import com.uhk.moviedb.service.RoleService;
 import com.uhk.moviedb.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -45,7 +44,7 @@ public class RegistrationView extends VerticalLayout {
                 passwordField,
                 new Button("Register", event -> {
                     u.setRole(roleService.getRoleByEnum(Role.RoleEnum.USER));
-                    userService.createUser(u);
+                    userService.save(u);
                     getUI().ifPresent(ui -> ui.navigate("login"));
                 })
         );
