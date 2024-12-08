@@ -36,6 +36,9 @@ public class RegistrationView extends VerticalLayout {
         usernameField.addValueChangeListener(event -> {
             u.setUsername(event.getValue());
         });
+        passwordField.addValueChangeListener(event -> {
+            u.setPassword(event.getValue());
+        });
 
         add(
                 new H1("MovieDB"),

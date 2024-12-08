@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public interface UserService extends UserDetailsService {
+public interface UserService {
     void save(User user);
     Optional<User> findUserById(Long id);
+    User findUserByUsername(String username);
+    void delete(User user);
 }
