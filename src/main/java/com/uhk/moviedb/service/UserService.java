@@ -12,4 +12,6 @@ public interface UserService {
     Optional<User> findUserById(Long id);
     User findUserByUsername(String username);
     void delete(User user);
+    boolean checkPassword(String userName, String password);
+    boolean checkUsername(String username);
 }

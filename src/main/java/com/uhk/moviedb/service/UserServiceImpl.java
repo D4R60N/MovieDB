@@ -42,12 +42,15 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        return new MyUserDetails(user);
+    @Override
+    public boolean checkPassword(String userName, String password) {
+        String encodedPassword = passwordEncoder.encode(password);
+        return userRepository.checkPassword(userName, encodedPassword);
+    }
+
+    @Override
+    public boolean checkUsername(String username) {
+        return userRepository.checkUsername(username);
     }
 
 }

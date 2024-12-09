@@ -17,15 +17,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RoutePrefix;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 
 import java.time.ZoneId;
 
-@Route("movie/edit")
-@PermitAll
-@AnonymousAllowed
+@Route(value = "movie/edit", layout = MovieDBAppLayout.class)
+@RolesAllowed("ROLE_MODERATOR")
 public class EditMovieView extends VerticalLayout implements HasUrlParameter<Long> {
     MovieServiceImpl movieService;
     GenreService genreService;

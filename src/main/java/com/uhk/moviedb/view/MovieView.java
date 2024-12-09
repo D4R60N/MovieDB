@@ -2,6 +2,8 @@ package com.uhk.moviedb.view;
 
 import com.uhk.moviedb.model.Rating;
 import com.uhk.moviedb.model.User;
+import com.uhk.moviedb.security.SecurityConfiguration;
+import com.uhk.moviedb.security.SecurityService;
 import com.uhk.moviedb.service.*;
 import com.uhk.moviedb.view.component.RatingComponent;
 import com.vaadin.flow.component.Text;
@@ -19,29 +21,28 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 
 import java.time.Instant;
-import java.util.Optional;
 
 
-@Route("movie")
+@Route(value = "movie", layout = MovieDBAppLayout.class)
 @PermitAll
 @AnonymousAllowed
 public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
     MovieService movieService;
     GenreService genreService;
     RatingService ratingService;
-    UserService userService;
+    SecurityService securityService;
 
     private Long movieId;
     private User author;
 
 
-    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, UserService userService) {
+    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService) {
         this.movieService = movieService;
         this.genreService = genreService;
         this.ratingService = ratingService;
-        this.userService = userService;
-        //ošetřit
-        author = userService.findUserById(1L).orElse(null);
+        this.securityService = securityService;
+
+        author = securityService.getAuthenticatedUser();
     }
 
     @Override
@@ -80,6 +81,9 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 ratingService.createRating(userRating);
                 getUI().ifPresent(ui -> ui.refreshCurrentRoute(false));
             }));
+            if(author == null) {
+                rating.setEnabled(false);
+            }
 
 
             add(

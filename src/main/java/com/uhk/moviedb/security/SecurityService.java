@@ -1,5 +1,6 @@
 package com.uhk.moviedb.security;
 
+import com.uhk.moviedb.model.User;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,11 +14,12 @@ public class SecurityService {
 
     private static final String LOGOUT_SUCCESS_URL = "/";
 
-    public UserDetails getAuthenticatedUser() {
+    public User getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
-            return (UserDetails) context.getAuthentication().getPrincipal();
+            MyUserDetails myUserDetails = (MyUserDetails) context.getAuthentication().getPrincipal();
+            return myUserDetails.getUser();
         }
         // Anonymous or no authentication.
         return null;

@@ -26,9 +26,8 @@ import java.util.List;
 
 import static com.vaadin.flow.component.textfield.NumberField.*;
 
-@Route("addMovie")
+@Route(value = "addMovie", layout = MovieDBAppLayout.class)
 @PermitAll
-@AnonymousAllowed
 public class AddMovieView extends VerticalLayout {
     MovieServiceImpl movieService;
     GenreService genreService;

@@ -11,7 +11,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-@Route("registration")
+@Route("sign-up")
 @AnonymousAllowed
 public class RegistrationView extends VerticalLayout {
 
@@ -28,6 +28,13 @@ public class RegistrationView extends VerticalLayout {
         TextField emailField = new TextField("Email");
         TextField usernameField = new TextField("Username");
         TextField passwordField = new TextField("Password");
+        TextField passwordField2 = new TextField("Repeat Your Password");
+
+        emailField.setRequired(true);
+        usernameField.setRequired(true);
+        passwordField.setRequired(true);
+        passwordField2.setRequired(true);
+
         User u = new User();
 
         emailField.addValueChangeListener(event -> {
@@ -45,11 +52,26 @@ public class RegistrationView extends VerticalLayout {
                 emailField,
                 usernameField,
                 passwordField,
-                new Button("Register", event -> {
+                new Button("Sign Up", event -> {
+                    if (!checkPassword(passwordField.getValue(), passwordField2.getValue())) {
+                        passwordField.setErrorMessage("Passwords do not match");
+                        passwordField2.setErrorMessage("Passwords do not match");
+                        return;
+                    }
+                    if(!userService.checkUsername(usernameField.getValue())) {
+                        usernameField.setErrorMessage("Username already exists");
+                        return;
+                    }
+
                     u.setRole(roleService.getRoleByEnum(Role.RoleEnum.USER));
                     userService.save(u);
                     getUI().ifPresent(ui -> ui.navigate("login"));
+
                 })
         );
+    }
+
+    private boolean checkPassword(String password, String password2) {
+        return password.equals(password2);
     }
 }
