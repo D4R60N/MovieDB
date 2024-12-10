@@ -1,5 +1,6 @@
 package com.uhk.moviedb.service;
 
+import com.uhk.moviedb.model.Profile;
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.repository.UserRepository;
 import com.uhk.moviedb.security.MyUserDetails;
@@ -24,6 +25,9 @@ public class UserServiceImpl implements UserService {
     public void save(User user) {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
+        if(user.getProfile() == null) {
+            user.setProfile(new Profile());
+        }
         userRepository.save(user);
     }
 

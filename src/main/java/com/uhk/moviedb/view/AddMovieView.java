@@ -2,8 +2,10 @@ package com.uhk.moviedb.view;
 
 import com.uhk.moviedb.model.Genre;
 import com.uhk.moviedb.model.Movie;
+import com.uhk.moviedb.security.SecurityService;
 import com.uhk.moviedb.service.GenreService;
 import com.uhk.moviedb.service.MovieServiceImpl;
+import com.uhk.moviedb.service.ProfileService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -27,10 +30,10 @@ import java.util.List;
 import static com.vaadin.flow.component.textfield.NumberField.*;
 
 @Route(value = "addMovie", layout = MovieDBAppLayout.class)
-@PermitAll
+@RolesAllowed("ROLE_MODERATOR")
 public class AddMovieView extends VerticalLayout {
-    MovieServiceImpl movieService;
-    GenreService genreService;
+    private final MovieServiceImpl movieService;
+    private final GenreService genreService;
 
 
     public AddMovieView(MovieServiceImpl movieService, GenreService genreService) {

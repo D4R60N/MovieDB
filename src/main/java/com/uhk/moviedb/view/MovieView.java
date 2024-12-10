@@ -1,8 +1,8 @@
 package com.uhk.moviedb.view;
 
 import com.uhk.moviedb.model.Rating;
+import com.uhk.moviedb.model.Role;
 import com.uhk.moviedb.model.User;
-import com.uhk.moviedb.security.SecurityConfiguration;
 import com.uhk.moviedb.security.SecurityService;
 import com.uhk.moviedb.service.*;
 import com.uhk.moviedb.view.component.RatingComponent;
@@ -12,6 +12,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Section;
 
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import com.vaadin.flow.router.BeforeEvent;
@@ -20,6 +22,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 
+import javax.swing.*;
 import java.time.Instant;
 
 
@@ -27,20 +30,23 @@ import java.time.Instant;
 @PermitAll
 @AnonymousAllowed
 public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
-    MovieService movieService;
-    GenreService genreService;
-    RatingService ratingService;
-    SecurityService securityService;
+    private final MovieService movieService;
+    private final GenreService genreService;
+    private final RatingService ratingService;
+    private final SecurityService securityService;
+    private final ProfileService profileService;
 
     private Long movieId;
     private User author;
+    private boolean isFavorite;
 
 
-    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService) {
+    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService, ProfileService profileService) {
         this.movieService = movieService;
         this.genreService = genreService;
         this.ratingService = ratingService;
         this.securityService = securityService;
+        this.profileService = profileService;
 
         author = securityService.getAuthenticatedUser();
     }
@@ -81,10 +87,31 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 ratingService.createRating(userRating);
                 getUI().ifPresent(ui -> ui.refreshCurrentRoute(false));
             }));
+            Icon icon = new Icon(VaadinIcon.HEART_O);
             if(author == null) {
                 rating.setEnabled(false);
+                icon.setVisible(false);
+            } else {
+                if (profileService.isMovieFavorite(author.getProfile(), movie)) {
+                    icon.setIcon(VaadinIcon.HEART);
+                }
+                icon.setSize("1em");
+                icon.addClickListener(e -> {
+                    if(isFavorite) {
+                        profileService.removeMovieFromFavorite(author.getProfile(), movie);
+                        icon.setIcon(VaadinIcon.HEART_O);
+                    } else {
+                        profileService.addMovieToFavorite(author.getProfile(), movie);
+                        icon.setIcon(VaadinIcon.HEART);
+                    }
+                });
             }
-
+            Button editButton = new Button("Edit", e -> {
+                getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
+            });
+            if(author == null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
+                editButton.setVisible(false);
+            }
 
             add(
                     new H1(movie.getTitle()),
@@ -95,10 +122,8 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                     duration,
                     releaseDate,
                     rating,
-
-                    new Button("Edit", e -> {
-                        getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
-                    })
+                    icon,
+                    editButton
             );
         });
     }
