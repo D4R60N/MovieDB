@@ -20,5 +20,4 @@ public class Profile {
     @OneToMany(fetch = FetchType.EAGER)
     private Set<Movie> favoriteMovies;
 
-
 }

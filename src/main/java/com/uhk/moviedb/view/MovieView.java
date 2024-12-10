@@ -10,10 +10,12 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Section;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import com.vaadin.flow.router.BeforeEvent;
@@ -21,8 +23,6 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
-
-import javax.swing.*;
 import java.time.Instant;
 
 
@@ -68,6 +68,18 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
             duration.add(new Text("Duration: " + movie.getDuration() + " minutes"));
             Section releaseDate = new Section();
             releaseDate.add(new Text("Release Date: " + movie.getReleaseDate()));
+            VerticalLayout trailer = new VerticalLayout();
+            if(movie.getTrailer() != null) {
+                trailer.add(new Text("Trailer: "));
+                IFrame iFrame = new IFrame("https://www.youtube.com/embed/" + movie.getTrailer());
+                iFrame.setHeight("315px");
+                iFrame.setWidth("560px");
+                iFrame.setAllow("accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture");
+                iFrame.getElement().setAttribute("allowfullscreen", true);
+                iFrame.getElement().setAttribute("frameborder", "0");
+                trailer.add(iFrame);
+            }
+
             Section rating = new Section();
             Rating userRating = ratingService.findByMovieAndAuthor(movie, author).orElse(new Rating());
             rating.add(new Text("Rating: " + movieService.calculateAverageRating(movie)));
@@ -88,41 +100,46 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 getUI().ifPresent(ui -> ui.refreshCurrentRoute(false));
             }));
             Icon icon = new Icon(VaadinIcon.HEART_O);
-            if(author == null) {
+            if (author == null) {
                 rating.setEnabled(false);
                 icon.setVisible(false);
             } else {
                 if (profileService.isMovieFavorite(author.getProfile(), movie)) {
                     icon.setIcon(VaadinIcon.HEART);
+                    isFavorite = true;
                 }
-                icon.setSize("1em");
+                icon.setSize("2em");
                 icon.addClickListener(e -> {
-                    if(isFavorite) {
+                    if (isFavorite) {
                         profileService.removeMovieFromFavorite(author.getProfile(), movie);
                         icon.setIcon(VaadinIcon.HEART_O);
+                        isFavorite = false;
                     } else {
                         profileService.addMovieToFavorite(author.getProfile(), movie);
                         icon.setIcon(VaadinIcon.HEART);
+                        isFavorite = true;
                     }
                 });
             }
             Button editButton = new Button("Edit", e -> {
                 getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
             });
-            if(author == null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
+            if (author == null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
                 editButton.setVisible(false);
             }
 
             add(
-                    new H1(movie.getTitle()),
+                    new HorizontalLayout(new  H1(movie.getTitle()), icon),
                     description,
-                    genre,
-                    director,
-                    actors,
-                    duration,
-                    releaseDate,
+                    new HorizontalLayout(
+                            new VerticalLayout(genre,
+                                    director,
+                                    actors,
+                                    duration,
+                                    releaseDate),
+                            trailer
+                    ),
                     rating,
-                    icon,
                     editButton
             );
         });

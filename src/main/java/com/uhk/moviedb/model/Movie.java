@@ -33,4 +33,5 @@ public class Movie {
     private Genre genre;
 
     private Instant releaseDate;
+    private String trailer;
 }

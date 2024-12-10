@@ -9,6 +9,9 @@ import com.uhk.moviedb.repository.UserRepository;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -41,7 +44,13 @@ public class ProfileServiceImpl implements ProfileService {
         if(profile.getFavoriteMovies() == null) {
             return false;
         }
-        return profile.getFavoriteMovies().contains(movie);
+        Set<Movie> favoriteMovies = profile.getFavoriteMovies();
+        for(Movie favoriteMovie : favoriteMovies) {
+            if(favoriteMovie.getId().equals(movie.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

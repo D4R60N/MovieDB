@@ -57,6 +57,9 @@ public class EditMovieView extends VerticalLayout implements HasUrlParameter<Lon
             DatePicker releaseDate = new DatePicker("Release Date");
             releaseDate.setValue(movie.getReleaseDate().atZone(ZoneId.systemDefault()).toLocalDate());
             NumberField rating = new NumberField("Rating");
+            TextField trailer = new TextField("Trailer");
+            trailer.setValue(movie.getTrailer());
+            trailer.setPlaceholder("Youtube Link");
             rating.setValue(movieService.calculateAverageRating(movie));
             rating.setReadOnly(true);
 
@@ -84,6 +87,7 @@ public class EditMovieView extends VerticalLayout implements HasUrlParameter<Lon
                             actors,
                             releaseDate,
                             duration,
+                            trailer,
                             rating
                     ),
                     new Button("Save", e -> {
@@ -94,6 +98,7 @@ public class EditMovieView extends VerticalLayout implements HasUrlParameter<Lon
                         movie.setActors(actors.getValue());
                         movie.setDuration(duration.getValue().intValue());
                         movie.setGenre(genre.getValue());
+                        movie.setTrailer(trailer.getValue());
                         movieService.save(movie);
                         Notification notification = Notification.show("Movie Saved!");
                         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);

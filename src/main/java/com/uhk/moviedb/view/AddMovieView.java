@@ -47,6 +47,8 @@ public class AddMovieView extends VerticalLayout {
         TextArea actors = new TextArea("Actors");
         NumberField duration = new NumberField("Duration (minutes)");
         ComboBox<Genre> genreCB = new ComboBox<>();
+        TextField trailer = new TextField("Trailer");
+        trailer.setPlaceholder("Youtube Link");
 
         title.setRequired(true);
         description.setRequired(true);
@@ -76,6 +78,7 @@ public class AddMovieView extends VerticalLayout {
         form.addFormItem(director, "director");
         form.addFormItem(actors, "actors");
         form.addFormItem(duration, "duration");
+        form.addFormItem(trailer, "trailer");
         Button saveButton = new Button("Save");
         saveButton.addClickListener(e -> {
             List<String> errorList = new ArrayList<>();
@@ -116,6 +119,7 @@ public class AddMovieView extends VerticalLayout {
             movie.setActors(actors.getValue());
             movie.setDuration(duration.getValue().intValue());
             movie.setGenre(genreCB.getValue());
+            movie.setTrailer(trailer.getValue());
             movieService.save(movie);
             getUI().ifPresent(ui -> ui.navigate(""));
             Notification notification = Notification.show("Movie Saved!");
