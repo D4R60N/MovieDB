@@ -81,7 +81,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
             }
 
             Section rating = new Section();
-            Rating userRating = ratingService.findByMovieAndAuthor(movie, author).orElse(new Rating());
+            Rating userRating =author == null ? new Rating() : ratingService.findByMovieAndAuthor(movie, author).orElse(new Rating());
             rating.add(new Text("Rating: " + movieService.calculateAverageRating(movie)));
             RatingComponent ratingComponent = new RatingComponent();
             if (userRating.getRating() != null)
@@ -124,8 +124,19 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
             Button editButton = new Button("Edit", e -> {
                 getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
             });
-            if (author == null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
+            Button reviewButton = new Button("Review", e -> {
+                getUI().ifPresent(ui -> ui.navigate("movie/review/" + movieId));
+            });
+            HorizontalLayout buttons = new HorizontalLayout(editButton, reviewButton);
+            if(author == null) {
                 editButton.setVisible(false);
+                reviewButton.setVisible(false);
+            }
+            else if (author.getRole() != null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
+                editButton.setVisible(false);
+                if(!author.getRole().getRoleName().equals(Role.RoleEnum.CRITIC)) {
+                    reviewButton.setVisible(false);
+                }
             }
 
             add(
@@ -140,7 +151,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                             trailer
                     ),
                     rating,
-                    editButton
+                    buttons
             );
         });
     }
