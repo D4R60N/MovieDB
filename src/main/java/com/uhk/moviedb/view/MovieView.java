@@ -1,6 +1,7 @@
 package com.uhk.moviedb.view;
 
 import com.uhk.moviedb.model.Rating;
+import com.uhk.moviedb.model.Review;
 import com.uhk.moviedb.model.Role;
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.security.SecurityService;
@@ -9,6 +10,7 @@ import com.uhk.moviedb.view.component.RatingComponent;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Section;
@@ -24,6 +26,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 
 @Route(value = "movie", layout = MovieDBAppLayout.class)
@@ -35,18 +39,20 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
     private final RatingService ratingService;
     private final SecurityService securityService;
     private final ProfileService profileService;
+    private final ReviewService reviewService;
 
     private Long movieId;
     private User author;
     private boolean isFavorite;
 
 
-    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService, ProfileService profileService) {
+    public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService, ProfileService profileService, ReviewService reviewService) {
         this.movieService = movieService;
         this.genreService = genreService;
         this.ratingService = ratingService;
         this.securityService = securityService;
         this.profileService = profileService;
+        this.reviewService = reviewService;
 
         author = securityService.getAuthenticatedUser();
     }
@@ -128,16 +134,47 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 getUI().ifPresent(ui -> ui.navigate("movie/review/" + movieId));
             });
             HorizontalLayout buttons = new HorizontalLayout(editButton, reviewButton);
+
+            Optional<Review> myReview = reviewService.findFirstByAuthorAndMovie(author, movie);
+
             if(author == null) {
                 editButton.setVisible(false);
                 reviewButton.setVisible(false);
             }
-            else if (author.getRole() != null || !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
+            else if (author.getRole() != null && !author.getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
                 editButton.setVisible(false);
-                if(!author.getRole().getRoleName().equals(Role.RoleEnum.CRITIC)) {
+                if(!author.getRole().getRoleName().equals(Role.RoleEnum.CRITIC) || myReview.isPresent()) {
                     reviewButton.setVisible(false);
                 }
             }
+
+            Text review = new Text("Reviews");
+            VerticalLayout reviewLayout = new VerticalLayout();
+
+            List<Review> reviews = reviewService.findByMovie(movie);
+            reviews.forEach(r -> {
+                HorizontalLayout reviewInnerLayout = new HorizontalLayout();
+                Text t = new Text(r.getAuthor().getUsername() + ": " + r.getContent());
+                reviewInnerLayout.add(t);
+                if(myReview.isPresent() && myReview.get().getId().equals(r.getId())) {
+                    Button editReviewButton = new Button("Edit", e -> {
+                        getUI().ifPresent(ui -> ui.navigate("movie/review/edit/" + r.getId()));
+                    });
+                    editReviewButton.addThemeVariants(ButtonVariant.LUMO_ICON);
+                    reviewInnerLayout.add(editReviewButton);
+
+                    Button deleteReviewButton = new Button("Delete", e -> {
+                        reviewService.delete(r);
+                        reviewInnerLayout.removeAll();
+                        reviewLayout.setVisible(false);
+                        reviewButton.setVisible(true);
+                    });
+                    reviewInnerLayout.add(deleteReviewButton);
+                }
+
+                reviewLayout.add(reviewInnerLayout);
+            });
+
 
             add(
                     new HorizontalLayout(new  H1(movie.getTitle()), icon),
@@ -151,7 +188,9 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                             trailer
                     ),
                     rating,
-                    buttons
+                    buttons,
+                    review,
+                    reviewLayout
             );
         });
     }

@@ -3,6 +3,7 @@ package com.uhk.moviedb.view;
 import com.uhk.moviedb.model.Genre;
 import com.uhk.moviedb.service.GenreService;
 import com.uhk.moviedb.service.MovieServiceImpl;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -102,6 +103,7 @@ public class EditMovieView extends VerticalLayout implements HasUrlParameter<Lon
                         movieService.save(movie);
                         Notification notification = Notification.show("Movie Saved!");
                         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                        UI.getCurrent().navigate("/movie/" + movie.getId());
                     })
             );
         });

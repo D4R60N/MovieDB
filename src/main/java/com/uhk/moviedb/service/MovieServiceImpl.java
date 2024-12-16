@@ -4,6 +4,8 @@ import com.uhk.moviedb.model.Movie;
 import com.uhk.moviedb.model.Rating;
 import com.uhk.moviedb.repository.MovieRepository;
 import com.uhk.moviedb.repository.RatingRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,13 +39,18 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public List<Movie> findAll() {
-        return movieRepository.findAll();
+    public Page<Movie> findAll(PageRequest pageRequest) {
+        return movieRepository.findAll(pageRequest);
     }
 
     @Override
     public Optional<Movie> findById(Long id) {
         return movieRepository.findById(id);
+    }
+
+    @Override
+    public List<Movie> searchMovieByTitle(String value, PageRequest pageRequest) {
+        return movieRepository.findByTitleContainingIgnoreCase(value, pageRequest);
     }
 }
 

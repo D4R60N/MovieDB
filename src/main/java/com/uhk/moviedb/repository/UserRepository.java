@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
 
@@ -13,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Procedure(procedureName = "checkUsername")
     boolean checkUsername(@Param("username") String username);
+
+    List<User> findByUsernameContaining(String value);
 }

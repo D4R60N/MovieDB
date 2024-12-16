@@ -3,12 +3,10 @@ package com.uhk.moviedb.service;
 import com.uhk.moviedb.model.Profile;
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.repository.UserRepository;
-import com.uhk.moviedb.security.MyUserDetails;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -55,6 +53,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean checkUsername(String username) {
         return userRepository.checkUsername(username);
+    }
+
+    @Override
+    public List<User> searchUserByUsername(String value) {
+        return userRepository.findByUsernameContaining(value);
     }
 
 }

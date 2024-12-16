@@ -79,6 +79,7 @@ public class MovieDBAppLayout extends AppLayout {
     private void createDrawer() {
         RouterLink indexView = new RouterLink("Main Page", IndexView.class);
         RouterLink addMovieView = new RouterLink("Add new Movie", AddMovieView.class);
+        RouterLink editUsersView = new RouterLink("Edit Users", EditUsersView.class);
         indexView.setHighlightCondition(HighlightConditions.sameLocation());
 
 
@@ -90,6 +91,7 @@ public class MovieDBAppLayout extends AppLayout {
         }
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MODERATOR"))) {
             drawer.add(new HorizontalLayout(new Icon(VaadinIcon.FILE_ADD), addMovieView));
+            drawer.add(new HorizontalLayout(new Icon(VaadinIcon.USERS), editUsersView));
         }
     }
 

@@ -1,6 +1,8 @@
 package com.uhk.moviedb.service;
 
 import com.uhk.moviedb.model.Movie;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,8 +16,9 @@ public interface MovieService {
 
     Double calculateAverageRating(Movie movie);
 
-    List<Movie> findAll();
+    Page<Movie> findAll(PageRequest pageRequest);
 
     Optional<Movie> findById(Long id);
 
+    List<Movie> searchMovieByTitle(String value, PageRequest pageRequest);
 }
