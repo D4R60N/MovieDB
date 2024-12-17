@@ -46,6 +46,7 @@ public class AddReviewView extends VerticalLayout implements HasUrlParameter<Lon
             Notification notification = Notification.show("Movie not found!");
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             getUI().ifPresent(ui -> ui.navigate(""));
+            return;
         }
         FormLayout form = new FormLayout();
         TextArea reviewText = new TextArea("Write your review...");
@@ -83,7 +84,7 @@ public class AddReviewView extends VerticalLayout implements HasUrlParameter<Lon
             review.setAuthor(securityService.getAuthenticatedUser());
             review.setCreatedAt(Instant.now());
             reviewService.save(review);
-            getUI().ifPresent(ui -> ui.navigate(""));
+            getUI().ifPresent(ui -> ui.navigate("movie/" + movie.getId()));
             Notification notification = Notification.show("Review Saved!");
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         });

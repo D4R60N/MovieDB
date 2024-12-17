@@ -6,11 +6,16 @@ import com.uhk.moviedb.service.RoleService;
 import com.uhk.moviedb.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Route("sign-up")
 @AnonymousAllowed
@@ -51,39 +56,58 @@ public class RegistrationView extends VerticalLayout {
 
         Button btn = new Button("Sign Up");
         btn.addClickListener(event -> {
+            List<String> errors = new ArrayList<>();
             if (passwordField.isEmpty()) {
                 passwordField.setErrorMessage("Password cannot be empty");
-                return;
+                errors.add("Password cannot be empty");
             }
-            if (passwordField2.isEmpty()) {
+            else if (passwordField2.isEmpty()) {
                 passwordField2.setErrorMessage("Password cannot be empty");
-                return;
+                errors.add("Password cannot be empty");
             }
             if (usernameField.isEmpty()) {
                 usernameField.setErrorMessage("Username cannot be empty");
-                return;
+                errors.add("Username cannot be empty");
             }
             if (emailField.isEmpty()) {
                 emailField.setErrorMessage("Email cannot be empty");
-                return;
+                errors.add("Email cannot be empty");
             }
             if (!checkPassword(passwordField.getValue(), passwordField2.getValue())) {
                 passwordField.setErrorMessage("Passwords do not match");
                 passwordField2.setErrorMessage("Passwords do not match");
-                return;
+                errors.add("Passwords do not match");
             }
             if(!userService.checkUsername(usernameField.getValue())) {
                 usernameField.setErrorMessage("Username already exists");
-                return;
+                errors.add("Username already exists");
             }
             if(!emailField.getValue().matches(regex)) {
                 emailField.setErrorMessage("Invalid email");
-                return;
+                errors.add("Invalid email");
             }
 
-            u.setRole(roleService.getRoleByEnum(Role.RoleEnum.USER));
-            userService.save(u);
-            getUI().ifPresent(ui -> ui.navigate("login"));
+            if (errors.isEmpty()) {
+                u.setRole(roleService.getRoleByEnum(Role.RoleEnum.USER));
+                userService.save(u);
+                getUI().ifPresent(ui -> ui.navigate("login"));
+            }else {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Invalid values: ");
+                int i = 0;
+                for(String error : errors) {
+                    String end = ", ";
+                    if(i >= errors.size() - 1)
+                        end = ".";
+                    stringBuilder.append(error + end);
+                    i++;
+                }
+
+
+                Notification notification = Notification.show(stringBuilder.toString());
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+
 
         });
 

@@ -2,6 +2,7 @@ package com.uhk.moviedb.view;
 
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.security.SecurityService;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -86,7 +87,8 @@ public class MovieDBAppLayout extends AppLayout {
 
         drawer.add(new HorizontalLayout(new Icon(VaadinIcon.MOVIE), indexView));
         if (user != null) {
-            RouterLink profileView = new RouterLink("My profile", ProfileView.class, user.getId());
+            Anchor profileView = new Anchor("/profile/" + user.getId());
+            profileView.add(new Text("My Profile"));
             drawer.add(new HorizontalLayout(new Icon(VaadinIcon.USER), profileView));
         }
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_CRITIC") || grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {

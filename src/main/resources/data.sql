@@ -12,21 +12,13 @@ INSERT INTO genres (description, name) VALUES ('Action', 'Action movies.'),
                                               ('Documentary', 'Documentary movies.'),
                                               ('Romance', 'Romance movies.');
 
-INSERT Into profiles (id) VALUES (1), (2), (3);
+INSERT Into profiles (id, about_me, contact) VALUES (1, 'I am a user.', '444-444-4444'),
+                                                  (2, 'I am a critic.', '555-555-5555'),
+                                                  (3, 'I am a moderator.', '666-666-6666');
 
 INSERT INTO users (username, password, email, role_id, profile_id) VALUES ('user', '$2a$12$byqBMBHJ1m20mYaOfPi6u.0TnaY1akAOM.5TDHCJmAB6AkNhNAVRa', 'user@user.com', 1, 1),
                                                             ('critic', '$2a$12$byqBMBHJ1m20mYaOfPi6u.0TnaY1akAOM.5TDHCJmAB6AkNhNAVRa', 'critic@critic.com', 2, 2),
                                                             ('moderator', '$2a$12$byqBMBHJ1m20mYaOfPi6u.0TnaY1akAOM.5TDHCJmAB6AkNhNAVRa', 'moderator@moderator.com', 3, 3);
-
-CREATE PROCEDURE checkPassword(IN username VARCHAR(255), IN password VARCHAR(255), OUT is_valid BOOLEAN)
-BEGIN
-    SELECT EXISTS(SELECT * FROM users WHERE username = username AND password = password) INTO is_valid;
-END;
-
-CREATE PROCEDURE checkUsername(IN username VARCHAR(255), OUT is_valid BOOLEAN)
-BEGIN
-    SELECT EXISTS(SELECT * FROM users WHERE username = username) INTO is_valid;
-END;
 
 INSERT INTO movies (title, description, genre_id, release_date, actors, director, duration, trailer)
 VALUES ('The Lord of the Rings: The Fellowship of the Ring', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 7, '2001-12-19', 'Elijah Wood, Ian McKellen, Orlando Bloom', 'Peter Jackson', 178, 'V75dMMIW2B4'),
@@ -44,3 +36,73 @@ VALUES ('The Lord of the Rings: The Fellowship of the Ring', 'A meek Hobbit from
        ('Interstellar', 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity''s survival.', 6, '2014-11-07', 'Matthew McConaughey, Anne Hath', 'Christopher Nolan', 169, 'zSWdZVtXT7E'),
        ('The Prestige', 'After a tragic accident, two stage magicians engage in a battle to create the ultimate illusion while sacrificing everything they have to outwit each other.', 8, '2006-10-20', 'Christian Bale, Hugh Jackman, Scarlett Johansson', 'Christopher Nolan', 130, 'o4gHCmTQDVI'),
        ('The Departed', 'An undercover cop and a mole in the police attempt to identify each other while infiltrating an Irish gang in South Boston.', 2, '2006-10-06', 'Leonardo DiCaprio, Matt Damon, Jack Nicholson', 'Martin Scorsese', 151, 'auYbpnEwBBg');
+
+INSERT INTO ratings (created_at, rating, user_id, movie_id)
+VALUES ('2021-06-01 12:00:00', 5, 1, 1),
+       ('2021-06-01 12:00:00', 4, 1, 2),
+       ('2021-06-01 12:00:00', 3, 1, 3),
+       ('2021-06-01 12:00:00', 5, 1, 4),
+       ('2021-06-01 12:00:00', 4, 1, 5),
+       ('2021-06-01 12:00:00', 5, 1, 6),
+       ('2021-06-01 12:00:00', 4, 1, 7),
+       ('2021-06-01 12:00:00', 3, 1, 8),
+       ('2021-06-01 12:00:00', 5, 1, 9),
+       ('2021-06-01 12:00:00', 4, 1, 10),
+       ('2021-06-01 12:00:00', 5, 1, 11),
+       ('2021-06-01 12:00:00', 4, 1, 12),
+       ('2021-06-01 12:00:00', 3, 1, 13),
+       ('2021-06-01 12:00:00', 5, 1, 14),
+       ('2021-06-01 12:00:00', 4, 1, 15),
+       ('2021-06-01 12:00:00', 3, 2, 1),
+       ('2021-06-01 12:00:00', 5, 2, 2),
+       ('2021-06-01 12:00:00', 4, 2, 3),
+       ('2021-06-01 12:00:00', 3, 2, 4),
+       ('2021-06-01 12:00:00', 5, 2, 5),
+       ('2021-06-01 12:00:00', 4, 2, 6),
+       ('2021-06-01 12:00:00', 3, 2, 7),
+       ('2021-06-01 12:00:00', 5, 2, 8),
+       ('2021-06-01 12:00:00', 4, 2, 9),
+       ('2021-06-01 12:00:00', 3, 2, 10),
+       ('2021-06-01 12:00:00', 5, 2, 11),
+       ('2021-06-01 12:00:00', 4, 2, 12),
+       ('2021-06-01 12:00:00', 3, 2, 13),
+       ('2021-06-01 12:00:00', 5, 2, 14),
+       ('2021-06-01 12:00:00', 4, 2, 15);
+INSERT INTO reviews (created_at, content, user_id, movie_id)
+VALUES ('2021-06-01 12:00:00', 'This movie is great!', 2, 1),
+       ('2021-06-01 12:00:00', 'This movie is awesome!', 2, 2),
+       ('2021-06-01 12:00:00', 'This movie is amazing!', 2, 3),
+       ('2021-06-01 12:00:00', 'This movie is fantastic!', 2, 4),
+       ('2021-06-01 12:00:00', 'This movie is wonderful!', 2, 5),
+       ('2021-06-01 12:00:00', 'This movie is great!', 2, 6),
+       ('2021-06-01 12:00:00', 'This movie is awesome!', 2, 7),
+       ('2021-06-01 12:00:00', 'This movie is amazing!', 2, 8),
+       ('2021-06-01 12:00:00', 'This movie is fantastic!', 2, 9),
+       ('2021-06-01 12:00:00', 'This movie is wonderful!', 2, 10),
+       ('2021-06-01 12:00:00', 'This movie is great!', 2, 11),
+       ('2021-06-01 12:00:00', 'This movie is awesome!', 2, 12),
+       ('2021-06-01 12:00:00', 'This movie is amazing!', 2, 13),
+       ('2021-06-01 12:00:00', 'This movie is fantastic!', 2, 14),
+       ('2021-06-01 12:00:00', 'This movie is wonderful!', 2, 15),
+       ('2021-06-01 12:00:00', 'This movie is terrible!', 3, 4),
+       ('2021-06-01 12:00:00', 'This movie is awful!', 3, 5),
+       ('2021-06-01 12:00:00', 'This movie is bad!', 3, 6),
+       ('2021-06-01 12:00:00', 'This movie is horrible!', 3, 7),
+       ('2021-06-01 12:00:00', 'This movie is terrible!', 3, 8),
+       ('2021-06-01 12:00:00', 'This movie is awful!', 3, 9),
+       ('2021-06-01 12:00:00', 'This movie is bad!', 3, 10),
+       ('2021-06-01 12:00:00', 'This movie is horrible!', 3, 11),
+       ('2021-06-01 12:00:00', 'This movie is terrible!', 3, 12),
+       ('2021-06-01 12:00:00', 'This movie is awful!', 3, 13),
+       ('2021-06-01 12:00:00', 'This movie is bad!', 3, 14),
+       ('2021-06-01 12:00:00', 'This movie is horrible!', 3, 15);
+CREATE PROCEDURE checkPassword(IN username VARCHAR(255), IN password VARCHAR(255), OUT is_valid BOOLEAN)
+BEGIN
+    SELECT EXISTS(SELECT * FROM users WHERE username = username AND password = password) INTO is_valid;
+END;
+
+CREATE PROCEDURE checkUsername(IN username VARCHAR(255), OUT is_valid BOOLEAN)
+BEGIN
+    SELECT EXISTS(SELECT * FROM users WHERE username = username) INTO is_valid;
+END;
+

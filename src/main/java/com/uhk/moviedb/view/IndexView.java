@@ -36,13 +36,6 @@ public class IndexView extends VerticalLayout {
         this.securityService = securityService;
         this.movieService = movieService;
         pageRequest = PageRequest.of(0, 10);
-        Button button = new Button("Add Movie", e -> {
-            getUI().ifPresent(ui -> ui.navigate("addMovie"));
-        });
-        if (securityService.getAuthenticatedUser() == null || !securityService.getAuthenticatedUser().getRole().getRoleName().equals(Role.RoleEnum.MODERATOR)) {
-            button.setVisible(false);
-        }
-
         movies = movieService.findAll(pageRequest).stream().toList();
 
         H1 h1 = new H1("Welcome to MovieDB");
@@ -73,7 +66,6 @@ public class IndexView extends VerticalLayout {
             removeAll();
             add(
                     h1,
-                    button,
                     h2,
                     horizontalLayout,
                     new MovieList<Movie>(movies),
@@ -92,7 +84,6 @@ public class IndexView extends VerticalLayout {
             removeAll();
             add(
                     h1,
-                    button,
                     h2,
                     horizontalLayout,
                     new MovieList<Movie>(movies),
@@ -104,7 +95,6 @@ public class IndexView extends VerticalLayout {
 
         add(
                 h1,
-                button,
                 h2,
                 horizontalLayout,
                 new MovieList<Movie>(movies),

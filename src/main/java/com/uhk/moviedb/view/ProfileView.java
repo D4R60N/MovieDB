@@ -54,12 +54,13 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Long>
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, Long aLong) {
+        removeAll();
         userId = aLong;
         User user = userService.findUserById(userId).orElse(null);
         if (user == null) {
-            getUI().ifPresent(ui -> ui.navigate(""));
+            this.getUI().ifPresent(ui -> ui.navigate("profile/" + loggedUser.getId()));
+            return;
         }
-        assert user != null;
         Profile profile = user.getProfile();
         Button editProfileButton = new Button("Edit profile", new Icon(VaadinIcon.EDIT));
         editProfileButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -94,7 +95,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Long>
                 addRating(ratingsLayout, newRatings);
                 nextButton.setVisible(!isDoneLoadingRating(newRatings));
             });
-            tabSheet.add("Ratings", ratingsLayout);
+            tabSheet.add("Ratings", new VerticalLayout(ratingsLayout, nextButton));
         } else {
             tabSheet.add("Ratings", new VerticalLayout(new Text("No ratings")));
         }
@@ -110,7 +111,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Long>
                 addReviews(reviewsLayout, newReviews);
                 nextButton.setVisible(!isDoneLoadingReview(newReviews));
             });
-            tabSheet.add("Reviews", reviewsLayout);
+            tabSheet.add("Reviews", new VerticalLayout(reviewsLayout, nextButton));
         } else {
             tabSheet.add("Reviews", new VerticalLayout(new Text("No reviews")));
         }

@@ -85,7 +85,7 @@ public class EditReviewView extends VerticalLayout implements HasUrlParameter<Lo
             review.setContent(reviewText.getValue());
             review.setCreatedAt(Instant.now());
             reviewService.save(review);
-            getUI().ifPresent(ui -> ui.navigate(""));
+            getUI().ifPresent(ui -> ui.navigate("movie/" + review.getMovie().getId()));
             Notification notification = Notification.show("Review Saved!");
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         });

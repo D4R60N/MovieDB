@@ -58,7 +58,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
         this.securityService = securityService;
         this.profileService = profileService;
         this.reviewService = reviewService;
-        pageRequest = PageRequest.of(0, 1);
+        pageRequest = PageRequest.of(0, 5);
 
         author = securityService.getAuthenticatedUser();
     }
@@ -194,7 +194,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 Button deleteReviewButton = new Button("Delete", e -> {
                     reviewService.delete(r);
                     reviewInnerLayout.removeAll();
-                    reviewLayout.setVisible(false);
+                    reviewInnerLayout.setVisible(false);
                     reviewButton.setVisible(true);
                 });
                 reviewInnerLayout.add(deleteReviewButton);
