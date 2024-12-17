@@ -53,13 +53,12 @@ public class MovieDBAppLayout extends AppLayout {
 
         logo.addClassNames("text-l", "m-m");
         HorizontalLayout accountBar = new HorizontalLayout();
-        Icon icon = new Icon(VaadinIcon.COG);
 
         if (user != null) {
             Avatar avatar = new Avatar(user.getUsername());
-            Anchor anchor = new Anchor("/profile", icon);
+            Anchor anchor = new Anchor("/profile/" + user.getId(), avatar);
             anchor.getStyle().set("margin-top", "4px");
-            accountBar.add(avatar, anchor);
+            accountBar.add(anchor);
             Button logoutBtn = new Button("Log Out", e -> securityService.logout());
             header = new HorizontalLayout(movieDBLink, logoutBtn, accountBar);
         } else {
@@ -86,6 +85,10 @@ public class MovieDBAppLayout extends AppLayout {
         drawer = new VerticalLayout();
 
         drawer.add(new HorizontalLayout(new Icon(VaadinIcon.MOVIE), indexView));
+        if (user != null) {
+            RouterLink profileView = new RouterLink("My profile", ProfileView.class, user.getId());
+            drawer.add(new HorizontalLayout(new Icon(VaadinIcon.USER), profileView));
+        }
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_CRITIC") || grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
 
         }

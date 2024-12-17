@@ -16,7 +16,7 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //@Size(min = 0, max = 5)
+//    @Size(min = 0, max = 5)
     private Integer rating;
 
     private Instant createdAt;

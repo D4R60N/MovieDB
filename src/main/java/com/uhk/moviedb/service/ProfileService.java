@@ -9,9 +9,4 @@ import org.springframework.stereotype.Service;
 public interface ProfileService {
     void save(Profile profile);
     void delete(Profile profile);
-    void addMovieToFavorite(Profile profile, Movie movie);
-
-    boolean isMovieFavorite(Profile profile, Movie movie);
-
-    void removeMovieFromFavorite(Profile profile, Movie movie);
 }

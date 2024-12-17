@@ -20,11 +20,16 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.data.domain.PageRequest;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +48,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
 
     private Long movieId;
     private User author;
-    private boolean isFavorite;
+    private PageRequest pageRequest;
 
 
     public MovieView(MovieServiceImpl movieService, GenreService genreService, RatingService ratingService, SecurityService securityService, ProfileService profileService, ReviewService reviewService) {
@@ -53,6 +58,7 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
         this.securityService = securityService;
         this.profileService = profileService;
         this.reviewService = reviewService;
+        pageRequest = PageRequest.of(0, 1);
 
         author = securityService.getAuthenticatedUser();
     }
@@ -86,6 +92,18 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 trailer.add(iFrame);
             }
 
+            SplitLayout splitLayout = new SplitLayout(
+                    new VerticalLayout(genre,
+                            director,
+                            actors,
+                            duration,
+                            releaseDate),
+                    trailer
+            );
+            splitLayout.setSplitterPosition(50);
+            splitLayout.setHeightFull();
+            splitLayout.setWidthFull();
+
             Section rating = new Section();
             Rating userRating =author == null ? new Rating() : ratingService.findByMovieAndAuthor(movie, author).orElse(new Rating());
             rating.add(new Text("Rating: " + movieService.calculateAverageRating(movie)));
@@ -105,27 +123,8 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
                 ratingService.createRating(userRating);
                 getUI().ifPresent(ui -> ui.refreshCurrentRoute(false));
             }));
-            Icon icon = new Icon(VaadinIcon.HEART_O);
             if (author == null) {
                 rating.setEnabled(false);
-                icon.setVisible(false);
-            } else {
-                if (profileService.isMovieFavorite(author.getProfile(), movie)) {
-                    icon.setIcon(VaadinIcon.HEART);
-                    isFavorite = true;
-                }
-                icon.setSize("2em");
-                icon.addClickListener(e -> {
-                    if (isFavorite) {
-                        profileService.removeMovieFromFavorite(author.getProfile(), movie);
-                        icon.setIcon(VaadinIcon.HEART_O);
-                        isFavorite = false;
-                    } else {
-                        profileService.addMovieToFavorite(author.getProfile(), movie);
-                        icon.setIcon(VaadinIcon.HEART);
-                        isFavorite = true;
-                    }
-                });
             }
             Button editButton = new Button("Edit", e -> {
                 getUI().ifPresent(ui -> ui.navigate("movie/edit/" + movieId));
@@ -151,47 +150,60 @@ public class MovieView extends VerticalLayout implements HasUrlParameter<Long> {
             Text review = new Text("Reviews");
             VerticalLayout reviewLayout = new VerticalLayout();
 
-            List<Review> reviews = reviewService.findByMovie(movie);
-            reviews.forEach(r -> {
-                HorizontalLayout reviewInnerLayout = new HorizontalLayout();
-                Text t = new Text(r.getAuthor().getUsername() + ": " + r.getContent());
-                reviewInnerLayout.add(t);
-                if(myReview.isPresent() && myReview.get().getId().equals(r.getId())) {
-                    Button editReviewButton = new Button("Edit", e -> {
-                        getUI().ifPresent(ui -> ui.navigate("movie/review/edit/" + r.getId()));
-                    });
-                    editReviewButton.addThemeVariants(ButtonVariant.LUMO_ICON);
-                    reviewInnerLayout.add(editReviewButton);
-
-                    Button deleteReviewButton = new Button("Delete", e -> {
-                        reviewService.delete(r);
-                        reviewInnerLayout.removeAll();
-                        reviewLayout.setVisible(false);
-                        reviewButton.setVisible(true);
-                    });
-                    reviewInnerLayout.add(deleteReviewButton);
-                }
-
-                reviewLayout.add(reviewInnerLayout);
+            List<Review> reviews = reviewService.findByMovie(movie, pageRequest);
+            reviews.forEach(r -> addReview(reviewLayout, r, reviewButton, myReview));
+            Button nextButton = new Button("Load more");
+            nextButton.setVisible(!isDoneLoadingReview(reviews));
+            nextButton.addClickListener(e -> {
+                pageRequest = PageRequest.of(pageRequest.getPageNumber() + 1, pageRequest.getPageSize());
+                List<Review> newReviews = reviewService.findByMovie(movie, pageRequest);
+                newReviews.forEach(r -> addReview(reviewLayout, r, reviewButton, myReview));
+                nextButton.setVisible(!isDoneLoadingReview(newReviews));
             });
 
 
             add(
-                    new HorizontalLayout(new  H1(movie.getTitle()), icon),
+                    new HorizontalLayout(new  H1(movie.getTitle())),
                     description,
-                    new HorizontalLayout(
-                            new VerticalLayout(genre,
-                                    director,
-                                    actors,
-                                    duration,
-                                    releaseDate),
-                            trailer
-                    ),
+                    splitLayout,
                     rating,
                     buttons,
+                    new Section(),
                     review,
-                    reviewLayout
+                    reviewLayout,
+                    nextButton
             );
         });
+    }
+    private void addReview(VerticalLayout reviewLayout, Review r, Button reviewButton, Optional<Review> myReview) {
+        {
+            HorizontalLayout reviewInnerLayout = new HorizontalLayout();
+            RouterLink t = new RouterLink(r.getAuthor().getUsername() + ": ", ProfileView.class, r.getAuthor().getId());
+            TextArea content =  new TextArea();
+            content.setValue(r.getContent());
+            content.setReadOnly(true);
+            content.setLabel("Review:");
+            reviewInnerLayout.add(new VerticalLayout(t, content));
+            if(myReview.isPresent() && myReview.get().getId().equals(r.getId())) {
+                Button editReviewButton = new Button("Edit", e -> {
+                    getUI().ifPresent(ui -> ui.navigate("movie/review/edit/" + r.getId()));
+                });
+                editReviewButton.addThemeVariants(ButtonVariant.LUMO_ICON);
+                reviewInnerLayout.add(editReviewButton);
+
+                Button deleteReviewButton = new Button("Delete", e -> {
+                    reviewService.delete(r);
+                    reviewInnerLayout.removeAll();
+                    reviewLayout.setVisible(false);
+                    reviewButton.setVisible(true);
+                });
+                reviewInnerLayout.add(deleteReviewButton);
+            }
+
+            reviewLayout.add(reviewInnerLayout);
+        }
+    }
+    private boolean isDoneLoadingReview(List<Review> reviews) {
+        return reviews.size() < pageRequest.getPageSize();
     }
 }

@@ -5,6 +5,7 @@ import com.uhk.moviedb.model.Profile;
 import com.uhk.moviedb.model.Review;
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.repository.ReviewRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,12 +29,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> findByMovie(Movie movie) {
-        return reviewRepository.findByMovie(movie);
+    public List<Review> findByMovie(Movie movie, PageRequest pageRequest) {
+        return reviewRepository.findByMovie(movie, pageRequest);
     }
     @Override
     public Optional<Review> findFirstByAuthorAndMovie(User user, Movie movie) {
         return reviewRepository.findFirstByAuthorAndMovie(user, movie);
+    }
+
+    @Override
+    public List<Review> findByAuthor(User author, PageRequest pageRequest) {
+        return reviewRepository.findByAuthor(author, pageRequest);
     }
 
     @Override

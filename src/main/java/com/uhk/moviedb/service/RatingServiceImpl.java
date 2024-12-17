@@ -4,8 +4,10 @@ import com.uhk.moviedb.model.Movie;
 import com.uhk.moviedb.model.Rating;
 import com.uhk.moviedb.model.User;
 import com.uhk.moviedb.repository.RatingRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,5 +32,10 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public Optional<Rating> findByMovieAndAuthor(Movie movie, User author) {
         return ratingRepository.findByMovieAndAuthor(movie, author);
+    }
+
+    @Override
+    public List<Rating> findByAuthor(User author, PageRequest pageRequest) {
+        return ratingRepository.findByAuthor(author, pageRequest);
     }
 }

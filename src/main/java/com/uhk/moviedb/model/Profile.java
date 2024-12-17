@@ -3,6 +3,7 @@ package com.uhk.moviedb.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 
 import java.util.Set;
@@ -17,12 +18,9 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "profile_favorite_movies",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id")
-    )
-    private Set<Movie> favoriteMovies;
+
+    private String aboutMe = "";
+
+    private String contact = "";
 
 }
